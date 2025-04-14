@@ -4,7 +4,7 @@ export const getInputAttributes = (members, transactionType = "default") => {
       type: "select",
       name: "memberId",
       label: "Member ID",
-      options: members.map((member) => member.memberId),
+      options: members.map((member) => member["Member ID"]),
     },
     {
       type: "text",

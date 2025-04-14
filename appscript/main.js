@@ -31,7 +31,7 @@ const addData = (formData) => {
         const dataCell = sheet.getRange(keyRow, keyColumn);
         dataCell.setValue(value);
         addedData[key] = value;
-      }
+      } 
     });
 
    // ⏪ Recurse interest repayment if it's a loanRepay transaction
@@ -41,7 +41,6 @@ const addData = (formData) => {
       transactionType: "interest",
       amount: formData.pendingInterest,
     };
-  
     const interestMsg = addData(interestForm);
     if (interestMsg.status === "success") {
       addedData.interest = interestForm.amount;
@@ -160,7 +159,7 @@ const fetchData = (formData) => {
     } else if (dataType === "recentTransactions") {
       dataObject = getRecentTransactionsData(memberId, limit, members);
     } else {
-      dataObject = getAccountData(memberId);
+      dataObject = getGeneralData();
     }
 
     return dataObject;
@@ -267,6 +266,36 @@ const getTransactionsData = (transactionType, memberId, limit, members) => {
     };
   }
 };
+const getGeneralData = () => {
+  try {
+    const { data: metricsData } = checkSheetData("metrics");
+    const { data: accountsData } = checkSheetData("accounts");
+
+    const [metricKeys, metricValues] = metricsData;
+    const metricObj = {};
+    metricKeys.forEach((key, index) => {
+      metricObj[key] = metricValues[index];
+    });
+
+    return {
+      status: "success",
+      action: "fetch",
+      message: "General data fetched successfully",
+      data: {
+        accountsData,
+        metricObj,
+      },
+    };
+  } catch (error) {
+    return {
+      status: "error",
+      message: error.message,
+    };
+  }
+};
+
+
+
 
 //Helper function to check sheet and return data
 const checkSheetData = (transactionType) => {
@@ -323,18 +352,19 @@ const generateTransactionId = (prefix) => {
 };
 
 //Convert string dates to date objects
-const convertToDate = (dateStr) => {
-  if (!dateStr || typeof dateStr !== "string") return null;
+const convertToDate = (input) => {
+  if (input instanceof Date) return input; // Already valid
+  if (typeof input !== "string") return null;
 
-  const parts = dateStr.split("/");
+  const parts = input.split("/");
+  if (parts.length !== 3) return null;
 
   const day = parseInt(parts[0], 10);
   const month = parseInt(parts[1], 10) - 1;
   const year = parseInt(parts[2], 10);
 
-  const parsedDate = new Date(year, month, day);
-
-  return isNaN(parsedDate.getTime()) ? null : parsedDate;
+  const date = new Date(year, month, day);
+  return isNaN(date.getTime()) ? null : date;
 };
 
 const requestHandlers = {

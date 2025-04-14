@@ -1,17 +1,10 @@
 import React from "react";
 import Amount from "../elements/Amount";
 
-const KeyMetrics = () => {
-  const keyMetrics = {
-    "Total savings": 300000,
-    "Total savings in arreas": 50000,
-    "Current month Savings": 400000,
-    "Outstanding loans sum": 680000,
-    "Cummulative Interest Earnings": 656000,
-  };
+const KeyMetrics = ({ metricsData = {} }) => {
   return (
     <section className="key-metrics">
-      {Object.entries(keyMetrics).map(([key, value]) => {
+      {Object.entries(metricsData).map(([key, value]) => {
         if (value) {
           return (
             <div className="data-item" key={key}>

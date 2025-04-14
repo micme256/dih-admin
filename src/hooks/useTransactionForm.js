@@ -1,6 +1,7 @@
 import { useState, useEffect, useContext } from "react";
 import { getInputAttributes } from "../components/helper-functions/getInputAttributes";
 import { MemberContext } from "../App";
+import { arraysToOjects } from "../components/helper-functions/arraysToObjects";
 
 const useTransactionForm = (initialTransaction = {}) => {
   const isEditing =
@@ -18,7 +19,10 @@ const useTransactionForm = (initialTransaction = {}) => {
           loanType: "",
         }
   );
-  const { members } = useContext(MemberContext);
+  const { accountsData } = useContext(MemberContext);
+  const members = arraysToOjects(accountsData)
+  console.log(members)
+
   const defautInputAttributes = getInputAttributes(
     members,
     initialTransaction.transactionType
@@ -26,14 +30,14 @@ const useTransactionForm = (initialTransaction = {}) => {
   const [inputAttributes, setInputAttributes] = useState(defautInputAttributes);
 
   const getMemberName = (memberId) => {
-    const member = members.find((m) => m.memberId === memberId);
-    return member ? member.memberName : "";
+    const member = members.find((m) => m["Member ID"] === memberId);
+    return member ? member["first Name"] : "";
   };
 
   useEffect(() => {
     const newFields = getInputAttributes(members, transaction.transactionType);
     const mergedFields = [...defautInputAttributes];
-    if (transaction.transactionType === "expenditures" || "loanRepay") {
+    if (transaction.transactionType === "expenditures" || transaction.transactionType === "loanRepay") {
       setInputAttributes(newFields);
       return;
     }
