@@ -1,5 +1,6 @@
 :root {
   --alternate-body-color: #f9fafb;
+  --focused-color: #d2d4d6;
   --primary-input-color: rgb(0, 132, 255);
   --error-color: red;
   --neon-color: #c7f02e;
@@ -37,8 +38,23 @@ ul {
   margin-bottom: 5px;
 }
 
+.button-group {
+  display: flex;
+  justify-content: center;
+  gap: 15px;
+  margin-top: 15px;
+}
+
+.button-group button {
+  padding: 8px 15px;
+  border: none;
+  font-size: 16px;
+  cursor: pointer;
+  border-radius: 5px;
+}
+
 //RECENT ACTIVITY
-.recent-activty {
+.recent-activity {
   display: flex;
   flex-direction: column;
   gap: 10px;
@@ -48,6 +64,15 @@ ul {
   font-size: 14px;
   display: flex;
   justify-content: space-between;
+  border-radius: 8px;
+  padding: 12px;
+  cursor: pointer;
+  transition: background-color 0.3s, box-shadow 0.3s;
+}
+.activity:hover,
+.activity:focus-within {
+  background-color: var(--focused-color);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
 }
 .activity .fname {
   font-weight: 400;
@@ -80,6 +105,21 @@ ul {
 }
 .trans-type.penalties {
   color: #8f0a1a;
+}
+
+.trans-delete-btn {
+  background: red;
+}
+
+.trans-edit-btn {
+  background: orange;
+}
+
+.activity-right .closed {
+  color: gray;
+}
+.activity-right .active {
+  color: green;
 }
 
 //TRANSACTION FORMS
@@ -184,21 +224,6 @@ input:focus {
 .key {
   font-weight: bold;
   text-transform: capitalize;
-}
-
-.button-group {
-  display: flex;
-  justify-content: center;
-  gap: 15px;
-  margin-top: 15px;
-}
-.button-group button {
-  padding: 8px 15px;
-  border: none;
-  color: white;
-  font-size: 16px;
-  cursor: pointer;
-  border-radius: 5px;
 }
 
 .edit-btn {

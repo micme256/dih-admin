@@ -1,35 +1,42 @@
-import { useState, useEffect, useContext, useMemo } from "react";
-import useFetchFromSheet from "./useFetchFromSheet";
-import { formatDate } from "../components/elements/formaDate";
+import { useState, useEffect, useContext } from "react";
 import { getInputAttributes } from "../components/helper-functions/getInputAttributes";
 import { MemberContext } from "../App";
 
-const useTransactionForm = (transactionType) => {
-  const intialDetails = {
-    transactionType: transactionType,
-    transactionId: "",
-    memberId: "",
-    amount: "",
-    transactionDate: formatDate(new Date()),
-    loanType: "",
-    status: "active",
-  };
-  const [transaction, setTransaction] = useState(intialDetails);
-  const [response, setResponse] = useState(null);
-  const [showFeedback, setShowFeedback] = useState(false);
-  const { loading, addRequest, editRequest, deleteRequest } =
-    useFetchFromSheet();
+const useTransactionForm = (initialTransaction = {}) => {
+  const isEditing =
+    initialTransaction.transactionType !== "loanRepay" &&
+    !!initialTransaction.transactionId;
+  const [transaction, setTransaction] = useState(
+    isEditing || initialTransaction.transactionType === "loanRepay"
+      ? { ...initialTransaction }
+      : {
+          transactionType: initialTransaction.transactionType,
+          transactionId: "",
+          memberId: "",
+          amount: "",
+          transactionDate: new Date().toISOString().split("T")[0],
+          loanType: "",
+        }
+  );
   const { members } = useContext(MemberContext);
+  const defautInputAttributes = getInputAttributes(
+    members,
+    initialTransaction.transactionType
+  );
+  const [inputAttributes, setInputAttributes] = useState(defautInputAttributes);
 
-  const [editMode, setEditMode] = useState(false);
-  const [undoMode, setUndoMode] = useState(false);
+  const getMemberName = (memberId) => {
+    const member = members.find((m) => m.memberId === memberId);
+    return member ? member.memberName : "";
+  };
 
-  const [prevAttributes, setPrevAttributes] = useState([]);
-  const inputAttributes = useMemo(() => {
-    const newFields = getInputAttributes(members, transactionType);
-
-    const mergedFields = [...prevAttributes];
-
+  useEffect(() => {
+    const newFields = getInputAttributes(members, transaction.transactionType);
+    const mergedFields = [...defautInputAttributes];
+    if (transaction.transactionType === "expenditures" || "loanRepay") {
+      setInputAttributes(newFields);
+      return;
+    }
     newFields.forEach((newField) => {
       if (
         !mergedFields.some(
@@ -39,30 +46,8 @@ const useTransactionForm = (transactionType) => {
         mergedFields.push(newField);
       }
     });
-
-    return mergedFields;
-  }, [members, transactionType]);
-
-  useEffect(() => {
-    setPrevAttributes(inputAttributes);
-  }, [inputAttributes]);
-
-  const getMemberName = (memberId) => {
-    const member = members.find((m) => m.memberId === memberId);
-    return member ? member.memberName : "";
-  };
-
-  useEffect(() => {
-    if (response?.status === "success") {
-      setShowFeedback(true);
-      setTransaction(response.data);
-      if (response?.action === "delete") {
-        setUndoMode(true);
-      }
-    } else {
-      console.log(response);
-    }
-  }, [response]);
+    setInputAttributes(mergedFields);
+  }, [transaction.transactionType]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -78,56 +63,12 @@ const useTransactionForm = (transactionType) => {
     });
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-
-    try {
-      setShowFeedback(false);
-      let data;
-      if (editMode) {
-        data = await editRequest(transaction);
-      } else {
-        data = await addRequest(transaction);
-      }
-      setResponse(data);
-    } catch (error) {
-      setResponse(error);
-    }
-  };
-
-  const handleClose = () => {
-    setTransaction(intialDetails);
-    setShowFeedback(false);
-    setEditMode(false);
-    setUndoMode(false);
-  };
-  const handleEdit = () => {
-    setEditMode(true);
-    setShowFeedback(false);
-  };
-
-  const handleUndo = async () => {
-    try {
-      const data = await deleteRequest(transaction);
-      setResponse(data);
-    } catch (error) {
-      setResponse(error);
-    }
-  };
-
   return {
     transaction,
-    response,
+    setTransaction,
     inputAttributes,
-    loading,
-    showFeedback,
     handleChange,
-    handleSubmit,
-    handleClose,
-    handleEdit,
-    editMode,
-    handleUndo,
-    undoMode,
+    isEditing,
   };
 };
 

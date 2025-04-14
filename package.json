@@ -7,7 +7,7 @@
     "gpull": "clasp pull",
     "gpush": "clasp push",
     "gstart": "clasp push --watch",
-    "gcreate": "clasp create --title admin --parentId 12F7_qbhviFAh1vtytGmAXZvSWBLBwbzejV1ddBUYOMw --rootDir ./appscript",
+    "gcreate": "clasp create --title dih-admin --parentId 1we2RfaWYQ-uJ3aSa0g5qrhi8i1ujvz53EPcWSniuzBI --rootDir ./appscript",
     "start": "parcel src/index.html --dist-dir ./appscript",
     "build": "parcel build  src/index.html --dist-dir ./appscript"
   },
@@ -19,7 +19,7 @@
     "@google/clasp": "^2.5.0",
     "@parcel/transformer-sass": "^2.13.3",
     "@types/google-apps-script": "^1.0.91",
-    "parcel": "^2.13.3",
+    "parcel": "^2.14.4",
     "process": "^0.11.10"
   },
   "dependencies": {

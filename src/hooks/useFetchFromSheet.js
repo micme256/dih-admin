@@ -31,7 +31,11 @@ const useFetchFromSheet = () => {
     return await sendRequest(formData, "deleteData");
   };
 
-  return { loading, addRequest, editRequest, deleteRequest };
+  const fetchRequest = async (formData) => {
+    return await sendRequest(formData, "fetchData");
+  };
+
+  return { loading, addRequest, editRequest, deleteRequest, fetchRequest };
 };
 
 export default useFetchFromSheet;
