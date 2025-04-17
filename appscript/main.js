@@ -17,7 +17,7 @@ const addData = (formData) => {
     );
     const addedData = {};
     if (formData.memberId) {
-      addedData.memberName = memberName(formData.memberId);
+      addedData.memberName = members.get(formData.memberId) || "Unknown";
       if (!addedData.memberName) {
         throw new Error(`Member with ID '${formData.memberId}' not found`);
       }
@@ -31,22 +31,22 @@ const addData = (formData) => {
         const dataCell = sheet.getRange(keyRow, keyColumn);
         dataCell.setValue(value);
         addedData[key] = value;
-      } 
+      }
     });
 
-   // ⏪ Recurse interest repayment if it's a loanRepay transaction
-   if (transactionType === "loanRepay" && formData.pendingInterest) {
-    const interestForm = {
-      ...formData,
-      transactionType: "interest",
-      amount: formData.pendingInterest,
-    };
-    const interestMsg = addData(interestForm);
-    if (interestMsg.status === "success") {
-      addedData.interest = interestForm.amount;
-      addedData.interestTransId = interestMsg.data.transactionId;
+    // ⏪ Recurse interest repayment if it's a loanRepay transaction
+    if (transactionType === "loanRepay" && formData.pendingInterest) {
+      const interestForm = {
+        ...formData,
+        transactionType: "interest",
+        amount: formData.pendingInterest,
+      };
+      const interestMsg = addData(interestForm);
+      if (interestMsg.status === "success") {
+        addedData.interest = interestForm.amount;
+        addedData.interestTransId = interestMsg.data.transactionId;
+      }
     }
-  }
 
     const succesMsg = {
       status: "success",
@@ -84,7 +84,7 @@ const editData = (formData) => {
             edittedData[key] = value;
           }
         });
-        edittedData.memberName = memberName(formData.memberId);
+        edittedData.memberName = members.get(formData.memberId) || "Unknown";
         edittedData.transactionType = transactionType;
         updated = true;
         break;
@@ -127,7 +127,7 @@ const deleteData = (formData) => {
     const deletedData = {
       transactionId,
       memberId,
-      memberName: memberName(formData.memberId),
+      memberName: members.get(formData.memberId) || "Unknown",
     };
     return {
       status: "success",
@@ -294,9 +294,6 @@ const getGeneralData = () => {
   }
 };
 
-
-
-
 //Helper function to check sheet and return data
 const checkSheetData = (transactionType) => {
   try {
@@ -313,17 +310,6 @@ const checkSheetData = (transactionType) => {
   }
 };
 
-//Helper function to get member name
-const memberName = (memberId) => {
-  const sheetName = "Database";
-  const sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName(sheetName);
-  const data = sheet.getDataRange().getValues();
-  for (let i = 0; i < data.length; i++) {
-    if (data[i][0] === memberId) {
-      return data[i][1];
-    }
-  }
-};
 //Get names map
 const getAllMemberNames = () => {
   const sheetName = "Database";
@@ -334,7 +320,7 @@ const getAllMemberNames = () => {
 
   for (let i = 0; i < data.length; i++) {
     const memberId = data[i][0];
-    const memberName = data[i][1];
+    const memberName = data[i][2];
     memberMap.set(memberId, memberName);
   }
 
