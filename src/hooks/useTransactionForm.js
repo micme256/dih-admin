@@ -20,8 +20,7 @@ const useTransactionForm = (initialTransaction = {}) => {
         }
   );
   const { accountsData } = useContext(MemberContext);
-  const members = arraysToOjects(accountsData)
-  console.log(members)
+  const members = arraysToOjects(accountsData);
 
   const defautInputAttributes = getInputAttributes(
     members,
@@ -37,7 +36,10 @@ const useTransactionForm = (initialTransaction = {}) => {
   useEffect(() => {
     const newFields = getInputAttributes(members, transaction.transactionType);
     const mergedFields = [...defautInputAttributes];
-    if (transaction.transactionType === "expenditures" || transaction.transactionType === "loanRepay") {
+    if (
+      transaction.transactionType === "expenditures" ||
+      transaction.transactionType === "loanRepay"
+    ) {
       setInputAttributes(newFields);
       return;
     }

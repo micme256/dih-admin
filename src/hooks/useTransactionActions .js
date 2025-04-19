@@ -9,21 +9,25 @@ const useTransactionActions = () => {
 
   const submitTransaction = async (transaction, isEditing) => {
     try {
-      let response;
       transaction.transactionDate = formatDate(transaction.transactionDate);
-      if (isEditing) {
-        response = await editRequest(transaction);
-      } else {
-        response = await addRequest(transaction);
-      }
-      if (response.status !== "success") {
-        throw new Error(response);
-      }
+      const response = isEditing
+        ? await editRequest(transaction)
+        : await addRequest(transaction);
+
       if (response.status === "success") {
         navigate("/data-feedback", { state: { response } });
+      } else {
+        throw new Error(response.message || JSON.stringify(response));
       }
     } catch (error) {
-      navigate("/data-feedback", { state: { response: error } });
+      navigate("/data-feedback", {
+        state: {
+          response: {
+            status: "error",
+            message: error.message || "Unexpected error occurred.",
+          },
+        },
+      });
     }
   };
 
@@ -47,7 +51,7 @@ const useTransactionActions = () => {
   const handleLoanClearance = (loan) => {
     loan.transactionType = "loanRepay";
     navigate("/loan-clearing", {
-      state: { loanToClear: loan},
+      state: { loanToClear: loan },
     });
   };
 
@@ -55,12 +59,12 @@ const useTransactionActions = () => {
     transaction.forLoanWithId = transaction.transactionId;
     delete transaction.transactionId;
     const interest = transaction.pendingInterest;
-    if(interest > 0){
-    transaction.amount = transaction.amountPaid - interest;
-    if (transaction.amount <= 0) {
-      transaction.transactionType = "interest";
-      transaction.amount = transaction.amountPaid
-    }
+    if (interest > 0) {
+      transaction.amount = transaction.amountPaid - interest;
+      if (transaction.amount <= 0) {
+        transaction.transactionType = "interest";
+        transaction.amount = transaction.amountPaid;
+      }
     }
     return transaction;
   };

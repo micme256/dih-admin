@@ -3,12 +3,33 @@ function doGet() {
     .evaluate()
     .addMetaTag("viewport", "width=device-width, initial-scale=1.0");
 }
+const checkRequest = (formData, requestType) => {
+  let result;
+  switch (requestType) {
+    case "addData":
+      result = addData(formData);
+      break;
+    case "editData":
+      result = editData(formData);
+      break;
+    case "deleteData":
+      result = deleteData(formData);
+      break;
+    case "fetchData":
+      result = fetchData(formData);
+      break;
+    default:
+      result = addData(formData);
+  }
+  return result;
+};
 
 //Sending data to sheets
 const addData = (formData) => {
   try {
     const { transactionType } = formData;
     const { data, sheet } = checkSheetData(transactionType);
+    const members = getAllMemberNames();
 
     const keyRow = sheet.getLastRow() + 1;
     const headers = data[0];
@@ -47,6 +68,15 @@ const addData = (formData) => {
         addedData.interestTransId = interestMsg.data.transactionId;
       }
     }
+    //SEND EMAIL NOTIFICATION
+    const emailingData = {
+      memberId: addedData.memberId,
+      transactionType,
+      transactionId: addedData.transactionId,
+      amount: addedData.amount,
+      transactionDate: addedData.transactionDate,
+    };
+    transactionEmail(emailingData);
 
     const succesMsg = {
       status: "success",
@@ -69,6 +99,7 @@ const editData = (formData) => {
   try {
     const { transactionType, transactionId } = formData;
     const { data, sheet } = checkSheetData(transactionType);
+    const members = getAllMemberNames();
     const headers = data[0];
     let updated = false;
     const edittedData = {};
@@ -116,6 +147,7 @@ const deleteData = (formData) => {
   try {
     const { transactionType, transactionId, memberId } = formData;
     const { data, sheet } = checkSheetData(transactionType);
+    const members = getAllMemberNames();
     let deleted = false;
     for (let i = 0; i < data.length; i++) {
       if (data[i][0] === transactionId) {
@@ -354,16 +386,4 @@ const convertToDate = (input) => {
 
   const date = new Date(year, month, day);
   return isNaN(date.getTime()) ? null : date;
-};
-
-const requestHandlers = {
-  addData: addData,
-  editData: editData,
-  deleteData: deleteData,
-  fetchData: fetchData,
-};
-
-const checkRequest = (formData, requestType) => {
-  const handler = requestHandlers[requestType];
-  return handler ? handler(formData) : addData(formData);
 };

@@ -1,5 +1,6 @@
 const transactionEmail = (transactionData) => {
-  const { memberId, transactionType, transactionId, amount } = transactionData;
+  const { memberId, transactionType, transactionId, amount, transactionDate } =
+    transactionData;
   const email = emailsById(memberId);
   const name = nameById(memberId);
   let transaction;
@@ -23,15 +24,17 @@ const transactionEmail = (transactionData) => {
       transaction = transactionType;
   }
   const subject = "New " + transaction + " recorded";
-  const body = `Dear ${name} A new ${transaction} has been registered on your KIU ALUMNI DIH SACCO account.
+  const body = `Dear Mr. ${name} A new ${transaction} has been registered on your KIU ALUMNI DIH SACCO account on ${transactionDate}.
   TRANSACTION DETAILS:
   TRANSACTION ID: ${transactionId}
-  AMOUNT: ${amount}
+  AMOUNT: ${amount}.
   
   visit https://script.google.com/macros/s/AKfycbwGjkTeMGzxxwDjC0LZpmF2QVlq6QsVdiioWXEhsVM/dev to check your account
   
   Kind Regards: DIH TREASURY`;
-  sendEmails(subject, body, email);
+  if (email) {
+    sendEmails(subject, body, email);
+  }
 };
 
 const sendEmails = (subject, body, email) => {
@@ -43,18 +46,16 @@ const sendEmails = (subject, body, email) => {
 };
 
 const emailsById = (memberId) => {
-  const membersMap = getAllMemberNames();
-  const memberInfo = membersMap.get(memberId);
-  return memberInfo.email;
+  const memberInfo = getMemberInfoById(memberId);
+  return memberInfo ? memberInfo.email : null;
 };
 
 const nameById = (memberId) => {
-  const membersMap = getAllMemberNames();
-  const memberInfo = membersMap.get(memberId);
-  return memberInfo.name;
+  const memberInfo = getMemberInfoById(memberId);
+  return memberInfo ? memberInfo.name : null;
 };
 
-const emailsbyPost = (position) => {
+const emailsByPost = (position) => {
   const membersMap = membersInfoMap();
   const emails = [];
   for (const [, memberData] of membersMap.entries()) {
@@ -64,25 +65,24 @@ const emailsbyPost = (position) => {
   }
   return emails;
 };
-
+const getMemberInfoById = (memberId) => {
+  const membersMap = membersInfoMap();
+  return membersMap.get(memberId);
+};
 const membersInfoMap = () => {
   const sheetName = "Database";
   const sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName(sheetName);
   const data = sheet.getDataRange().getValues();
   const memberMap = new Map();
-
   for (let i = 1; i < data.length; i++) {
     const row = data[i];
     const memberId = row[0];
-
     const memberDetails = {
       name: row[2],
       position: row[7],
       email: row[5],
     };
-
     memberMap.set(memberId, memberDetails);
   }
-
   return memberMap;
 };

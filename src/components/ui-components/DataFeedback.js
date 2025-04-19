@@ -12,7 +12,7 @@ const DataFeedback = () => {
 
   if (!editMode) {
     if (!response || response.status !== "success") {
-      console.log("error", response?.message);
+      console.log(response);
       return null;
     }
   }
