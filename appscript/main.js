@@ -110,13 +110,16 @@ const editData = (formData) => {
 
 //Deleting data from the sheets
 const deleteData = (formData) => {
+  if (formData.transactionType === "loans") {
+    formData.transactionType = "newLoan";
+  }
   try {
     const { transactionType, transactionId, memberId } = formData;
     const { data, sheet } = checkSheetData(transactionType);
     let deleted = false;
     for (let i = 0; i < data.length; i++) {
       if (data[i][0] === transactionId) {
-        sheet.deleteRow(i + 1);
+        sheet.getRange(i + 1, 1, 1, sheet.getLastColumn()).clearContent();
         deleted = true;
         break;
       }
